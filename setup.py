@@ -46,5 +46,10 @@ setup(
     description='Turtlebot4 Webots ROS2 bridge',
     license='Apache-2.0',
     tests_require=['pytest'],
-    entry_points={},
+    entry_points={
+        'console_scripts': [
+            'turt_move = webots_ros2_turtlebot4.turt_move:main',
+            'ir_intensity_bridge = webots_ros2_turtlebot4.irIntensityBridge:main',
+        ],
+    },
 )
