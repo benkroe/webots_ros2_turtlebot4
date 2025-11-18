@@ -9,6 +9,27 @@ from typing import Union
 from sensor_msgs_py import point_cloud2 as pc2
 import math
 
+# Publishes: /Turtlebot4/ir_intensity  (std_msgs/Float32MultiArray) @ 10 Hz
+# Each element is a normalized intensity in [0.0,1.0] (unitless).
+# Index map (m.data):
+# 0 -> ir_intensity_front_center_left    -> /Turtlebot4/ir_intensity_front_center_left/point_cloud
+# 1 -> ir_intensity_front_center_right   -> /Turtlebot4/ir_intensity_front_center_right/point_cloud
+# 2 -> ir_intensity_front_left           -> /Turtlebot4/ir_intensity_front_left/point_cloud
+# 3 -> ir_intensity_front_right          -> /Turtlebot4/ir_intensity_front_right/point_cloud
+# 4 -> ir_intensity_left                 -> /Turtlebot4/ir_intensity_left/point_cloud
+# 5 -> ir_intensity_right                -> /Turtlebot4/ir_intensity_right/point_cloud
+# 6 -> ir_intensity_side_left            -> /Turtlebot4/ir_intensity_side_left/point_cloud
+#
+# Intensity calculation (per sensor):
+#  - d = nearest point distance from the PointCloud2 (meters).
+#  - if no valid points or d is NaN/Inf => intensity = 0.0
+#  - normalized = (d - min_range) / (max_range - min_range)
+#  - intensity = clamp(1.0 - normalized, 0.0, 1.0)   (defaults: min_range=0.02 m, max_range=0.20 m)
+#  - optional gaussian noise can be added (noise_std).
+#
+# Tune min_range/max_range/noise_std in the node to match real-sensor behaviour.
+
+
 def map_ir_intensity(raw: Union[PointCloud2, float],
                      min_range: float = 0.02,
                      max_range: float = 0.20,

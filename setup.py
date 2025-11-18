@@ -48,7 +48,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'turt_move = webots_ros2_turtlebot4.turt_move:main',
             'ir_intensity_bridge = webots_ros2_turtlebot4.irIntensityBridge:main',
         ],
     },
