@@ -1,6 +1,8 @@
 import os
 import launch
+import shutil
 from launch import LaunchDescription
+from launch.actions import OpaqueFunction
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions.path_join_substitution import PathJoinSubstitution
 from launch.substitutions import LaunchConfiguration
@@ -10,8 +12,39 @@ from webots_ros2_driver.webots_controller import WebotsController
 from webots_ros2_driver.wait_for_controller_connection import WaitForControllerConnection
 from launch_ros.actions import Node
 
+# copy the meshes manually to the shard directory, so the webots on macos can find them (outside of vm)
+def copy_meshes_to_shared(context, *args, **kwargs):
+    package_dir = get_package_share_directory('webots_ros2_turtlebot4')
+    src_meshes_dir = os.path.join(package_dir, 'meshes')
+
+    shared_env = os.environ.get('WEBOTS_SHARED_FOLDER')
+    shared_dir = shared_env.split(':')[-1]  # pick the VM path
+
+    if not os.path.exists(shared_dir):
+        os.makedirs(shared_dir)
+
+    # Copy turtlebot4 meshes
+    src_turtlebot4 = os.path.join(src_meshes_dir, 'turtlebot4')
+    dest_turtlebot4 = os.path.join(shared_dir, 'meshes', 'turtlebot4')
+    if os.path.exists(dest_turtlebot4):
+        shutil.rmtree(dest_turtlebot4)
+    shutil.copytree(src_turtlebot4, dest_turtlebot4)
+
+    # Copy create3 meshes
+    src_create3 = os.path.join(src_meshes_dir, 'create3')
+    dest_create3 = os.path.join(shared_dir, 'meshes', 'create3')
+    if os.path.exists(dest_create3):
+        shutil.rmtree(dest_create3)
+    shutil.copytree(src_create3, dest_create3)
+
+    print(f"[INFO] Copied turtlebot4 meshes from {src_turtlebot4} to {dest_turtlebot4}")
+    print(f"[INFO] Copied create3 meshes from {src_create3} to {dest_create3}")
+
+    return []
+
 def generate_launch_description():
     package_dir = get_package_share_directory('webots_ros2_turtlebot4')
+    OpaqueFunction(function=copy_meshes_to_shared),
 
     world = LaunchConfiguration('world')
     use_sim_time = LaunchConfiguration('use_sim_time', default=True)
@@ -98,7 +131,8 @@ def generate_launch_description():
             'world',
             default_value='turtlebot4_world.wbt',
             description='Choose one of the world files from `/webots_ros2_turtlebot/world` directory'
-        ),           
+        ),        
+        OpaqueFunction(function=copy_meshes_to_shared),   
         webots,
         webots._supervisor,
         robot_state_publisher,

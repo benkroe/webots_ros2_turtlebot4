@@ -31,7 +31,7 @@ PROTO Turtlebot4 [
         rotation 0.000000 0.000000 1.000000 1.570796
         children [
           DEF body_visual_visual CadShape {
-            url "/opt/ros/humble/share/irobot_create_description/meshes/body_visual.dae"
+            url "meshes/create3/body_visual.dae"
           }
         ]
       }
@@ -48,12 +48,12 @@ PROTO Turtlebot4 [
         translation 0.000000 0.000000 0.039200
         children [
           DEF bumper_visual_visual CadShape {
-            url "/opt/ros/humble/share/irobot_create_description/meshes/bumper_visual.dae"
+            url "meshes/create3/bumper_visual.dae"
           }
         ]
         name "bumper"
         boundingObject DEF bumper_collision Mesh {
-          url "/opt/ros/humble/share/irobot_create_description/meshes/bumper_collision.dae"
+          url "meshes/create3/bumper_collision.dae"
         }
         physics Physics {
           density -1
@@ -584,7 +584,7 @@ PROTO Turtlebot4 [
             rotation 0.577350 0.577350 0.577350 2.094395
             children [
               DEF shell_visual CadShape {
-                url "/opt/ros/humble/share/turtlebot4_description/meshes/shell.dae"
+                url "meshes/turtlebot4/shell.dae"
               }
             ]
           }
@@ -595,7 +595,7 @@ PROTO Turtlebot4 [
                 rotation 0.000000 1.000000 0.000000 1.570796
                 children [
                   DEF tower_standoff_visual CadShape {
-                    url "/opt/ros/humble/share/turtlebot4_description/meshes/tower_standoff.dae"
+                    url "meshes/turtlebot4/tower_standoff.dae"
                   }
                 ]
               }
@@ -694,7 +694,7 @@ PROTO Turtlebot4 [
             translation 0.000000 0.000000 0.252570
             children [
               DEF tower_sensor_plate_visual CadShape {
-                url "/opt/ros/humble/share/turtlebot4_description/meshes/tower_sensor_plate.dae"
+                url "meshes/turtlebot4/tower_sensor_plate.dae"
               }
             ]
             name "tower_sensor_plate"
@@ -722,7 +722,7 @@ PROTO Turtlebot4 [
             rotation 0.000000 0.000000 1.000000 1.570796
             children [
               DEF rplidar_visual CadShape {
-                url "/opt/ros/humble/share/turtlebot4_description/meshes/rplidar.dae"
+                url "meshes/turtlebot4/rplidar.dae"
               }
               Lidar {
                 name "rplidar"
@@ -757,13 +757,13 @@ PROTO Turtlebot4 [
             translation -0.118000 0.000000 0.052570
             children [
               DEF camera_bracket_visual CadShape {
-                url "/opt/ros/humble/share/turtlebot4_description/meshes/camera_bracket.dae"
+                url "meshes/turtlebot4/camera_bracket.dae"
               }
               Solid {
                 translation 0.058400 0.000000 0.096760
                 children [
                   DEF oakd_pro_visual CadShape {
-                    url "/opt/ros/humble/share/turtlebot4_description/meshes/oakd_pro.dae"
+                    url "meshes/turtlebot4/oakd_pro.dae"
                   }
                   Camera { # RGB Camera
                     children [
@@ -908,7 +908,7 @@ PROTO Turtlebot4 [
         ]
         name "shell_link"
         boundingObject DEF shell_collision Mesh {
-          url "/opt/ros/humble/share/turtlebot4_description/meshes/shell_collision.dae"
+          url "meshes/turtlebot4/shell_collision.dae"
         }
         physics Physics {
           density -1
@@ -924,7 +924,7 @@ PROTO Turtlebot4 [
         translation 0.060053 0.087588 0.097885
         children [
           DEF weight_block_visual CadShape {
-            url "/opt/ros/humble/share/turtlebot4_description/meshes/weight_block.dae"
+            url "meshes/turtlebot4/weight_block.dae"
           }
         ]
         name "front_left_bottom_weight_block"
