@@ -105,11 +105,13 @@ class IrIntensityBridge(Node):
                                    max_range=self.max_range,
                                    noise_std=self.noise_std)
             self.latest[idx] = val
+            self.get_logger().info(f"[ir_bridge] recv idx={idx} -> intensity={val:.3f}")
         return cb
 
     def _publish(self):
         m = Float32MultiArray()
         m.data = list(self.latest)
+        self.get_logger().info(f"[ir_bridge] publish ir_intensity (len={len(m.data)}) nonzero={[ (i,v) for i,v in enumerate(m.data) if v>0.0 ]}")
         self.pub.publish(m)
 
 def main(args=None):
