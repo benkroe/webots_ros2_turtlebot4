@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtualenvs
+.venv/
+venv/
+env/
+ENV/
+
+# Byte-compiled / distribution
+*.egg-info/
+dist/
+build/
+
+# ROS / colcon build outputs
+build/
+install/
+log/
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+
+# Editors / OS
+.vscode/
+*.swp
+*~
+.DS_Store
+
+# Python tooling
+pip-wheel-metadata/
+__pypackages__/
+
+# Misc
+*.egg
+.eggs/
+*.tar.gz
+
+# Optional: ignore compiled protobuf/python generated files if you generate them
+# *.pb.cc
+# *.pb.h
+# *.pyc
+
+# Keep project-specific source files (e.g. .proto, .wbt, meshes) tracked by default.

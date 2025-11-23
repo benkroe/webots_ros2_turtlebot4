@@ -49,6 +49,7 @@ setup(
     entry_points={
         'console_scripts': [
             'ir_intensity_bridge = webots_ros2_turtlebot4.irIntensityBridge:main',
+            'cliff_intensity_bridge = webots_ros2_turtlebot4.cliffIntensityBridge:main',
         ],
     },
 )

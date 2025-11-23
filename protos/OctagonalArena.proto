@@ -1,0 +1,179 @@
+#VRML_SIM R2023b utf8
+
+PROTO OctagonalArena [
+  field SFVec3f  floorSize         6 6 0.02
+  field SFColor  floorColor        0.6 0.6 0.6
+  field SFColor  whiteAreaColor    1 1 1
+  field SFColor  blackSpotColor    0 0 0
+  field SFVec3f  whiteAreaPos      2 0 0.011
+  field SFVec3f  blackSpot1Pos    -1.2 1 0.012
+  field SFVec3f  blackSpot2Pos    -1.2 -1 0.012
+  field SFFloat  blackSpot1Radius  0.30
+  field SFFloat  blackSpot2Radius  0.30
+  field SFVec3f  wallBoxSize       0.10 2.47 0.40
+  field SFColor  wallColor         0.2 0.2 0.2
+  field SFVec3f  lightLocation     3 0 1
+]
+{
+  Solid {
+    children [
+
+      # --- Floor visual ---
+      Transform {
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS floorColor } }
+            geometry Box { size IS floorSize }
+          }
+        ]
+      }
+
+      # --- White stripe ---
+      Transform {
+        translation IS whiteAreaPos
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS whiteAreaColor } }
+            geometry Box { size 2 6 0.02 }
+          }
+        ]
+      }
+
+      # --- Black spot 1 ---
+      Transform {
+        translation IS blackSpot1Pos
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS blackSpotColor } }
+            geometry Cylinder { radius IS blackSpot1Radius height 0.02 }
+          }
+        ]
+      }
+
+      # --- Black spot 2 ---
+      Transform {
+        translation IS blackSpot2Pos
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS blackSpotColor } }
+            geometry Cylinder { radius IS blackSpot2Radius height 0.02 }
+          }
+        ]
+      }
+
+      # --- Walls (8 segments of octagon) ---
+      Transform {
+        translation 3.05 0 0.20
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS wallColor } }
+            geometry Box { size IS wallBoxSize }
+          }
+        ]
+      }
+      Transform {
+        translation 2.156 2.156 0.20
+        rotation 0 0 1 0.785398
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS wallColor } }
+            geometry Box { size IS wallBoxSize }
+          }
+        ]
+      }
+      Transform {
+        translation 0 3.05 0.20
+        rotation 0 0 1 1.5708
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS wallColor } }
+            geometry Box { size IS wallBoxSize }
+          }
+        ]
+      }
+      Transform {
+        translation -2.156 2.156 0.20
+        rotation 0 0 1 2.35619
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS wallColor } }
+            geometry Box { size IS wallBoxSize }
+          }
+        ]
+      }
+      Transform {
+        translation -3.05 0 0.20
+        rotation 0 0 1 3.14159
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS wallColor } }
+            geometry Box { size IS wallBoxSize }
+          }
+        ]
+      }
+      Transform {
+        translation -2.156 -2.156 0.20
+        rotation 0 0 1 -2.35619
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS wallColor } }
+            geometry Box { size IS wallBoxSize }
+          }
+        ]
+      }
+      Transform {
+        translation 0 -3.05 0.20
+        rotation 0 0 1 -1.5708
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS wallColor } }
+            geometry Box { size IS wallBoxSize }
+          }
+        ]
+      }
+      Transform {
+        translation 2.156 -2.156 0.20
+        rotation 0 0 1 -0.785398
+        children [
+          Shape {
+            appearance Appearance { material Material { diffuseColor IS wallColor } }
+            geometry Box { size IS wallBoxSize }
+          }
+        ]
+      }
+
+      # --- Light ---
+      PointLight {
+        location IS lightLocation
+        color 1 1 0.95
+        intensity 1
+        attenuation 0 0 1
+        radius 6
+      }
+    ]
+
+    # ------------------------------------------------------
+    # COLLISION + PHYSICS (this prevents robot falling through)
+    # ------------------------------------------------------
+    boundingObject Group {
+      children [
+        # Floor collision
+        Transform {
+          children [
+            Box { size IS floorSize }
+          ]
+        }
+
+        # Wall collision geometry (matches all wall shapes)
+        Transform { translation 3.05 0 0.20  children [ Box { size IS wallBoxSize } ] }
+        Transform { translation 2.156 2.156 0.20 rotation 0 0 1 0.785398 children [ Box { size IS wallBoxSize } ] }
+        Transform { translation 0 3.05 0.20 rotation 0 0 1 1.5708 children [ Box { size IS wallBoxSize } ] }
+        Transform { translation -2.156 2.156 0.20 rotation 0 0 1 2.35619 children [ Box { size IS wallBoxSize } ] }
+        Transform { translation -3.05 0 0.20 rotation 0 0 1 3.14159 children [ Box { size IS wallBoxSize } ] }
+        Transform { translation -2.156 -2.156 0.20 rotation 0 0 1 -2.35619 children [ Box { size IS wallBoxSize } ] }
+        Transform { translation 0 -3.05 0.20 rotation 0 0 1 -1.5708 children [ Box { size IS wallBoxSize } ] }
+        Transform { translation 2.156 -2.156 0.20 rotation 0 0 1 -0.785398 children [ Box { size IS wallBoxSize } ] }
+      ]
+    }
+  }
+}
