@@ -2,6 +2,7 @@
 
 EXTERNPROTO "../protos/OctagonalArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+#EXTERNPROTO "../protos/Turtlebot4.proto"
 EXTERNPROTO "../protos/Turtlebot4.proto"
 
 

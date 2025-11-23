@@ -18,7 +18,7 @@ diffdrive_controller:
     left_wheel_names: ["left_wheel_joint"]
     right_wheel_names: ["right_wheel_joint"]
 
-    wheel_separation: 0.233000 # 0.116500*2 from TurtleBot4.proto
+    wheel_separation: 0.233000 # 0.116500*2 from proto
     wheel_radius: 0.035750000000000004
 
     # The real separation between wheels is not resulting in a perfect odometry
