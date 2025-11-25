@@ -3,7 +3,7 @@
 EXTERNPROTO "../protos/OctagonalArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
 #EXTERNPROTO "../protos/Turtlebot4.proto"
-EXTERNPROTO "../protos/Turtlebot4.proto"
+EXTERNPROTO "../protos/Turtlebot4_lightSensors.proto"
 
 
 WorldInfo {
@@ -21,7 +21,7 @@ OctagonalArena {
 TexturedBackground {
 }
 
-Turtlebot4 {
+Turtlebot4_lightSensors {
   hidden position_0_0 -1.5716964757510286e-05
   hidden position_0_1 -1.144371715132369e-05
   hidden linearVelocity_0 0.019995546215363362 0.010604352750537744 -0.003666395342572508
