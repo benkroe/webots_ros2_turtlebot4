@@ -15,9 +15,12 @@ Viewpoint {
   near 0.1
   far 100
 }
+
+
 OctagonalArena {
   wallColor 0.3 0.3 0.3
 }
+
 TexturedBackground {
 }
 
@@ -34,5 +37,9 @@ Turtlebot4_lightSensors {
   hidden rotation_8 0 0 -1 5.6882490222583355
   translation -0.14856778323325398 0.28988676639322625 -0.005845797252402113
   rotation -0.00820405362525342 -0.028021632209831605 0.999573649929014 -0.5120800487340365
+  name "Turtlebot4_0"
   controller "<extern>"
 }
+
+
+

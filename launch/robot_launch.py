@@ -109,7 +109,7 @@ def generate_launch_description():
     # Create a ROS node interacting with the simulated robot
     robot_description_path = os.path.join(package_dir, 'resource', 'turtlebot4.urdf')
     robot_driver = WebotsController(
-        robot_name='Turtlebot4',
+        robot_name='Turtlebot4_0',
         parameters=[
             {'robot_description': robot_description_path,
              'use_sim_time': use_sim_time,
