@@ -62,6 +62,7 @@ def generate_launch_description():
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
+        namespace=namespace,
         parameters=[{
             'robot_description': '<robot name=""><link name=""/></robot>'
         }],
@@ -125,11 +126,39 @@ def generate_launch_description():
 
     ros_control_spawners = [joint_state_broadcaster_spawner, diffdrive_controller_spawner]
     mappings = [
-        ('/diffdrive_controller/cmd_vel_unstamped', f'/{namespace}/cmd_vel'), 
-        ('/diffdrive_controller/odom', f'/{namespace}/odom'),
-        ('/Turtlebot4/rplidar', f'/{namespace}/scan'),
-        ('/Turtlebot4/oakd_stereo_camera/point_cloud', f'/{namespace}/depth_camera')
-    ]    
+    # Controller topics
+    (f'/{namespace}/diffdrive_controller/cmd_vel_unstamped', f'/{namespace}/cmd_vel'), 
+    (f'/{namespace}/diffdrive_controller/odom', f'/{namespace}/odom'),
+    # Sensor topics: Remap double-namespaced to single-namespaced
+    (f'/{namespace}/{namespace}/rplidar', f'/{namespace}/scan'),
+    (f'/{namespace}/{namespace}/rplidar/point_cloud', f'/{namespace}/rplidar/point_cloud'),
+    (f'/{namespace}/{namespace}/oakd_stereo_camera/point_cloud', f'/{namespace}/depth_camera'),
+    (f'/{namespace}/{namespace}/cliff_front_left', f'/{namespace}/cliff_front_left'),
+    (f'/{namespace}/{namespace}/cliff_front_right', f'/{namespace}/cliff_front_right'),
+    (f'/{namespace}/{namespace}/cliff_side_left', f'/{namespace}/cliff_side_left'),
+    (f'/{namespace}/{namespace}/cliff_side_right', f'/{namespace}/cliff_side_right'),
+    (f'/{namespace}/{namespace}/ir_intensity', f'/{namespace}/ir_intensity'),
+    (f'/{namespace}/{namespace}/ir_intensity_front_center_left/point_cloud', f'/{namespace}/ir_intensity_front_center_left/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_front_center_right/point_cloud', f'/{namespace}/ir_intensity_front_center_right/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_front_left/point_cloud', f'/{namespace}/ir_intensity_front_left/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_front_right/point_cloud', f'/{namespace}/ir_intensity_front_right/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_left/point_cloud', f'/{namespace}/ir_intensity_left/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_right/point_cloud', f'/{namespace}/ir_intensity_right/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_side_left/point_cloud', f'/{namespace}/ir_intensity_side_left/point_cloud'),
+    (f'/{namespace}/{namespace}/cliff_front_left/point_cloud', f'/{namespace}/cliff_front_left/point_cloud'),
+    (f'/{namespace}/{namespace}/cliff_front_right/point_cloud', f'/{namespace}/cliff_front_right/point_cloud'),
+    (f'/{namespace}/{namespace}/cliff_side_left/point_cloud', f'/{namespace}/cliff_side_left/point_cloud'),
+    (f'/{namespace}/{namespace}/cliff_side_right/point_cloud', f'/{namespace}/cliff_side_right/point_cloud'),
+    (f'/{namespace}/{namespace}/oakd_rgb_camera/camera_info', f'/{namespace}/oakd_rgb_camera/camera_info'),
+    (f'/{namespace}/{namespace}/oakd_rgb_camera/image_color', f'/{namespace}/oakd_rgb_camera/image_color'),
+    (f'/{namespace}/{namespace}/oakd_stereo_camera/camera_info', f'/{namespace}/oakd_stereo_camera/camera_info'),
+    (f'/{namespace}/{namespace}/oakd_stereo_camera/image', f'/{namespace}/oakd_stereo_camera/image'),
+    (f'/{namespace}/{namespace}/p3d_gps', f'/{namespace}/p3d_gps'),
+    (f'/{namespace}/{namespace}/p3d_gps/speed', f'/{namespace}/p3d_gps/speed'),
+    (f'/{namespace}/{namespace}/p3d_gps/speed_vector', f'/{namespace}/p3d_gps/speed_vector'),
+    (f'/{namespace}/{namespace}/light_front_left', f'/{namespace}/light_front_left'),
+    (f'/{namespace}/{namespace}/light_front_right', f'/{namespace}/light_front_right'),
+    ]
 
     # Create a ROS node interacting with the simulated robot
     robot_description_path = os.path.join(package_dir, 'resource', 'turtlebot4.urdf')
