@@ -98,6 +98,25 @@ def generate_launch_description():
         output='screen',
         arguments=['diffdrive_controller'] + controller_manager_timeout,
     )
+
+        # Add the bridge nodes
+    cliff_intensity_bridge = Node(
+        package='webots_ros2_turtlebot4',
+        executable='cliff_intensity_bridge',  # Assumes installed as executable (remove .py if needed)
+        name='cliff_intensity_bridge',
+        namespace='Turtlebot4'  # Matches the bridge's hardcoded namespace
+    )
+
+    ir_intensity_bridge = Node(
+        package='webots_ros2_turtlebot4',
+        executable='ir_intensity_bridge',  # Assumes installed as executable (remove .py if needed)
+        name='ir_intensity_bridge',
+        namespace='Turtlebot4'  # Matches the bridge's hardcoded namespace
+    )
+
+
+
+
     ros_control_spawners = [joint_state_broadcaster_spawner, diffdrive_controller_spawner]
     mappings = [
         ('/diffdrive_controller/cmd_vel_unstamped', '/cmd_vel'), 
@@ -109,7 +128,7 @@ def generate_launch_description():
     # Create a ROS node interacting with the simulated robot
     robot_description_path = os.path.join(package_dir, 'resource', 'turtlebot4.urdf')
     robot_driver = WebotsController(
-        robot_name='Turtlebot4_0',
+        robot_name='Turtlebot4',
         parameters=[
             {'robot_description': robot_description_path,
              'use_sim_time': use_sim_time,
@@ -139,6 +158,8 @@ def generate_launch_description():
         robot_state_publisher,
         tf_wheel_drop_left,
         tf_wheel_drop_right,
+        cliff_intensity_bridge,
+        ir_intensity_bridge,    
         robot_driver,
         waiting_nodes,
         # The following action will kill all nodes once the Webots simulation has exited

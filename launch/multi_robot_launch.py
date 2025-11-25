@@ -1,6 +1,8 @@
+
 import os
 import launch
 import shutil
+import yaml
 from launch import LaunchDescription
 from launch.actions import OpaqueFunction
 from launch.actions import DeclareLaunchArgument
@@ -12,21 +14,16 @@ from webots_ros2_driver.webots_controller import WebotsController
 from webots_ros2_driver.wait_for_controller_connection import WaitForControllerConnection
 from launch_ros.actions import Node
 
+ROBOT_NAMES = ["Turtlebot4_0", "Turtlebot4_1"]
+SPAWN_POSITIONS = [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0)]  # Not used in this simple version, but can be added later
 
-# Variables for multi-robot configuration
-NUM_ROBOTS = 3  # Number of robots (set to 3 to match robot_launch.py)
-#ROBOT_NAMES = ["Turtlebot4_0", "Turtlebot4_1", "Turtlebot4_2"]  # Explicit namespaces for robots
-ROBOT_NAMES = ["Turtlebot4_0"]
-#SPAWN_POSITIONS = [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (2.0, 0.0, 0.0)]  # Explicit spawn positions (x, y, z)
-SPAWN_POSITIONS = [(0.0, 0.0, 0.0)] 
-
-# Copy the meshes manually to the shared directory
+# copy the meshes manually to the shared directory, so the webots on macos can find them (outside of vm)
 def copy_meshes_to_shared(context, *args, **kwargs):
     package_dir = get_package_share_directory('webots_ros2_turtlebot4')
     src_meshes_dir = os.path.join(package_dir, 'meshes')
 
     shared_env = os.environ.get('WEBOTS_SHARED_FOLDER')
-    shared_dir = shared_env.split(':')[-1]  # Pick the VM path
+    shared_dir = shared_env.split(':')[-1]  # pick the VM path
 
     if not os.path.exists(shared_dir):
         os.makedirs(shared_dir)
@@ -52,40 +49,38 @@ def copy_meshes_to_shared(context, *args, **kwargs):
 
 def generate_launch_description():
     package_dir = get_package_share_directory('webots_ros2_turtlebot4')
-    OpaqueFunction(function=copy_meshes_to_shared),
-
-    # Launch arguments
     world = LaunchConfiguration('world')
     use_sim_time = LaunchConfiguration('use_sim_time', default=True)
-
-    # Start Webots simulation
+    
+    # Start a Webots simulation instance
     webots = WebotsLauncher(
         world=PathJoinSubstitution([package_dir, 'worlds', world]),
         ros2_supervisor=True
     )
 
-    # Nodes for each robot
     robot_nodes = []
-    for i, robot_name in enumerate(ROBOT_NAMES):
-        spawn_position = SPAWN_POSITIONS[i]
-        namespace = robot_name
+    
+    for robot_name in ROBOT_NAMES:
+        namespace = robot_name  # Use robot_name as namespace
+        
 
-        # Robot state publisher
+        
+        # Create the robot state publisher
         robot_state_publisher = Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
             output='screen',
             namespace=namespace,
             parameters=[{
-                'robot_description': '<robot name=""><link name=""/></robot>'
+                'robot_description': '<robot name=""><link name=""/></robot>'  # Dummy URDF
             }],
         )
 
-        # Wheel drop transforms
+        # wheel_drop_left and right
         tf_wheel_drop_left = Node(
             package='tf2_ros',
             executable='static_transform_publisher',
-            name=f'wheel_drop_left_to_base_link',
+            name='wheel_drop_left_to_base_link',
             output='screen',
             namespace=namespace,
             arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'wheel_drop_left'],
@@ -94,14 +89,14 @@ def generate_launch_description():
         tf_wheel_drop_right = Node(
             package='tf2_ros',
             executable='static_transform_publisher',
-            name=f'wheel_drop_right_to_base_link',
+            name='wheel_drop_right_to_base_link',
             output='screen',
             namespace=namespace,
             arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'wheel_drop_right'],
         )
 
         # ROS control spawners
-        ros2_control_params = os.path.join(package_dir, 'resource', 'ros2control.yaml')
+        ros2_control_params = os.path.join(package_dir, 'resource', 'ros2control_multi.yaml')
         controller_manager_timeout = ['--controller-manager-timeout', '50']
         joint_state_broadcaster_spawner = Node(
             package='controller_manager',
@@ -118,36 +113,36 @@ def generate_launch_description():
             arguments=['diffdrive_controller'] + controller_manager_timeout,
         )
         ros_control_spawners = [joint_state_broadcaster_spawner, diffdrive_controller_spawner]
-        mappings = [
-            ('/diffdrive_controller/cmd_vel_unstamped', '/cmd_vel'), 
-            ('/diffdrive_controller/odom', '/odom'),
-            ('/Turtlebot4/rplidar', '/scan'),
-            ('/Turtlebot4/oakd_stereo_camera/point_cloud', '/depth_camera')
-            ]    
 
-        # Webots controller
+        mappings = [
+            ('/diffdrive_controller/cmd_vel_unstamped', f'/{namespace}/cmd_vel'), 
+            ('/diffdrive_controller/odom', f'/{namespace}/odom'),
+            ('/Turtlebot4/rplidar', f'/{namespace}/scan'),
+            ('/Turtlebot4/oakd_stereo_camera/point_cloud', f'/{namespace}/depth_camera')
+        ]    
+
+        # Create a ROS node interacting with the simulated robot
         robot_description_path = os.path.join(package_dir, 'resource', 'turtlebot4.urdf')
         robot_driver = WebotsController(
-        robot_name=robot_name,
-        parameters=[
-            {
-                'robot_description': robot_description_path,
-                'use_sim_time': use_sim_time,
-                'set_robot_state_publisher': True,
-            },
-            ros2_control_params  # Load all controller parameters from YAML
-        ],
-        remappings=mappings,
-        namespace=namespace
+            robot_name=robot_name,
+            parameters=[
+                PathJoinSubstitution([package_dir, 'resource', 'ros2control_multi.yaml']),
+                {'robot_description': robot_description_path,
+                 'use_sim_time': use_sim_time,
+                 'set_robot_state_publisher': True,
+                 },
+                ros2_control_params
+            ],
+            remappings=mappings,
+            namespace=namespace
         )
 
-        # Wait for controller connection
+        # Wait for the simulation to be ready to start navigation nodes
         waiting_nodes = WaitForControllerConnection(
             target_driver=robot_driver,
             nodes_to_start=ros_control_spawners
-        )
+        )    
 
-        # Add nodes to the list
         robot_nodes.extend([
             robot_state_publisher,
             tf_wheel_drop_left,
@@ -156,18 +151,17 @@ def generate_launch_description():
             waiting_nodes,
         ])
 
-    # Return the LaunchDescription
     return LaunchDescription([
         DeclareLaunchArgument(
             'world',
-            default_value='octagon_turt_world.wbt',
+            default_value='octagon_turt_world_multi.wbt',
             description='Choose one of the world files from `/webots_ros2_turtlebot/world` directory'
-        ),
-        OpaqueFunction(function=copy_meshes_to_shared),
+        ),        
+        OpaqueFunction(function=copy_meshes_to_shared),   
         webots,
         webots._supervisor,
         *robot_nodes,
-        # Shutdown Webots when simulation exits
+        # The following action will kill all nodes once the Webots simulation has exited
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=webots,
