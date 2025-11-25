@@ -71,8 +71,8 @@ class IrIntensityBridge(Node):
                  min_range=0.02,
                  max_range=0.20,
                  noise_std=0.0):
-        # set namespace to "Turtlebot4"
-        super().__init__('ir_intensity_bridge', namespace='Turtlebot4')
+
+        super().__init__('ir_intensity_bridge')
 
         if sensor_topics is None:
             # relative topic names -> will resolve to /Turtlebot4/...
@@ -118,9 +118,13 @@ def main(args=None):
     node = IrIntensityBridge()
     try:
         rclpy.spin(node)
+    except KeyboardInterrupt:
+        node.get_logger().info('Shutting down ir_intensity_bridge node.')
     finally:
-        node.destroy_node()
-        rclpy.shutdown()
-
+        if rclpy.ok():
+            node.destroy_node()
+            rclpy.shutdown()
+    return 0
+    
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

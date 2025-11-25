@@ -46,8 +46,9 @@ class CliffIntensityBridge(Node):
                  min_range: float = 9.999999747378752e-05,
                  max_range: float = 0.15000000596046448,
                  noise_std: float = 0.0):
-        # set namespace to "Turtlebot4"
-        super().__init__('cliff_intensity_bridge', namespace='Turtlebot4')
+
+
+        super().__init__('cliff_intensity_bridge')
 
         if sensor_topics is None:
             sensor_topics = [
@@ -122,10 +123,13 @@ def main(args=None):
     node = CliffIntensityBridge()
     try:
         rclpy.spin(node)
+    except KeyboardInterrupt:
+        node.get_logger().info('Shutting down cliff_intensity_bridge node.')
     finally:
-        node.destroy_node()
-        rclpy.shutdown()
-
+        if rclpy.ok():
+            node.destroy_node()
+            rclpy.shutdown()
+    return 0
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
