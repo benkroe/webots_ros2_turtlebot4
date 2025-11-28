@@ -1,35 +1,15 @@
-
 #!/usr/bin/env python3
+import sys
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2
-from std_msgs.msg import Float32MultiArray
-from irobot_create_msgs/msg/IrIntensity import IrIntensityVector
-import random
+from irobot_create_msgs.msg import IrIntensityVector, IrIntensity
 from typing import Union
 from sensor_msgs_py import point_cloud2 as pc2
+import random
 import math
 
-# Publishes: /Turtlebot4/ir_intensity  (std_msgs/Float32MultiArray) @ 10 Hz
-# Each element is a normalized intensity in [0.0,1.0] (unitless).
-# Index map (m.data):
-# 0 -> ir_intensity_front_center_left    -> /Turtlebot4/ir_intensity_front_center_left/point_cloud
-# 1 -> ir_intensity_front_center_right   -> /Turtlebot4/ir_intensity_front_center_right/point_cloud
-# 2 -> ir_intensity_front_left           -> /Turtlebot4/ir_intensity_front_left/point_cloud
-# 3 -> ir_intensity_front_right          -> /Turtlebot4/ir_intensity_front_right/point_cloud
-# 4 -> ir_intensity_left                 -> /Turtlebot4/ir_intensity_left/point_cloud
-# 5 -> ir_intensity_right                -> /Turtlebot4/ir_intensity_right/point_cloud
-# 6 -> ir_intensity_side_left            -> /Turtlebot4/ir_intensity_side_left/point_cloud
-#
-# Intensity calculation (per sensor):
-#  - d = nearest point distance from the PointCloud2 (meters).
-#  - if no valid points or d is NaN/Inf => intensity = 0.0
-#  - normalized = (d - min_range) / (max_range - min_range)
-#  - intensity = clamp(1.0 - normalized, 0.0, 1.0)   (defaults: min_range=0.02 m, max_range=0.20 m)
-#  - optional gaussian noise can be added (noise_std).
-#
-# Tune min_range/max_range/noise_std in the node to match real-sensor behaviour.
-
+# ...existing code...
 
 def map_ir_intensity(raw: Union[PointCloud2, float],
                      min_range: float = 0.02,
@@ -62,10 +42,13 @@ def map_ir_intensity(raw: Union[PointCloud2, float],
 
     return max(0.0, min(1.0, intensity))
 
+
 class IrIntensityBridge(Node):
     """
     Node runs in the 'Turtlebot4' namespace. Topics supplied below are relative,
     so they resolve to /Turtlebot4/...
+    Publishes irobot_create_msgs/IrIntensityVector on 'ir_intensity'.
+    Each reading.value is in [0.0, 1.0].
     """
     def __init__(self,
                  sensor_topics=None,
@@ -91,7 +74,6 @@ class IrIntensityBridge(Node):
         self.max_range = max_range
         self.noise_std = noise_std
 
-        # publisher is relative -> publishes to /Turtlebot4/ir_intensity
         self.pub = self.create_publisher(IrIntensityVector, 'ir_intensity', 10)
         self.latest = [0.0] * len(self.sensor_topics)
 
@@ -106,12 +88,29 @@ class IrIntensityBridge(Node):
                                    max_range=self.max_range,
                                    noise_std=self.noise_std)
             self.latest[idx] = val
-            #self.get_logger().info(f"[ir_bridge] recv idx={idx} -> intensity={val:.3f}")
         return cb
 
     def _publish(self):
-        m = Float32MultiArray()
-        m.data = list(self.latest)
+        m = IrIntensityVector()
+        m.readings = []
+        for v in self.latest:
+            r = IrIntensity()
+            try:
+                # clamp normalized float to [0.0, 1.0]
+                fv = max(0.0, min(1.0, float(v)))
+            except Exception:
+                fv = 0.0
+            if hasattr(r, 'value'):
+                try:
+                    r.value = int(round(fv * 255.0))
+                except Exception:
+                    r.value = 0
+            if hasattr(r, 'intensity'):
+                try:
+                    r.intensity = float(fv)
+                except Exception:
+                    r.intensity = 0.0
+            m.readings.append(r)
         self.pub.publish(m)
 
 def main(args=None):
@@ -126,6 +125,6 @@ def main(args=None):
             node.destroy_node()
             rclpy.shutdown()
     return 0
-    
+
 if __name__ == '__main__':
     sys.exit(main())
