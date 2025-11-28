@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import PointCloud2
 from std_msgs.msg import Float32MultiArray
+from irobot_create_msgs/msg/IrIntensity import IrIntensityVector
 import random
 from typing import Union
 from sensor_msgs_py import point_cloud2 as pc2
@@ -91,7 +92,7 @@ class IrIntensityBridge(Node):
         self.noise_std = noise_std
 
         # publisher is relative -> publishes to /Turtlebot4/ir_intensity
-        self.pub = self.create_publisher(Float32MultiArray, 'ir_intensity', 10)
+        self.pub = self.create_publisher(IrIntensityVector, 'ir_intensity', 10)
         self.latest = [0.0] * len(self.sensor_topics)
 
         for idx, topic in enumerate(self.sensor_topics):
