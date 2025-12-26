@@ -1,18 +1,49 @@
-# ROS 2 build artifacts
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtualenvs
+.venv/
+venv/
+env/
+ENV/
+
+# Byte-compiled / distribution
+*.egg-info/
+dist/
+build/
+
+# ROS / colcon build outputs
 build/
 install/
 log/
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-*.egg-info/
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+coverage.xml
 
-# IDE
+# Editors / OS
 .vscode/
-.idea/
+*.swp
+*~
+.DS_Store
 
-# Webots
-.*.wbproj
+# Python tooling
+pip-wheel-metadata/
+__pypackages__/
+
+# Misc
+*.egg
+.eggs/
+*.tar.gz
+
+# Optional: ignore compiled protobuf/python generated files if you generate them
+# *.pb.cc
+# *.pb.h
+# *.pyc
+
+# Keep project-specific source files (e.g. .proto, .wbt, meshes) tracked by default.

@@ -2,8 +2,8 @@ import os
 import launch
 import shutil
 from launch import LaunchDescription
-from launch.actions import OpaqueFunction
-from launch.actions import DeclareLaunchArgument
+from launch.actions import OpaqueFunction, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions.path_join_substitution import PathJoinSubstitution
 from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
@@ -11,7 +11,7 @@ from webots_ros2_driver.webots_launcher import WebotsLauncher
 from webots_ros2_driver.webots_controller import WebotsController
 from webots_ros2_driver.wait_for_controller_connection import WaitForControllerConnection
 from launch_ros.actions import Node
-
+from launch.event_handlers import OnProcessExit, OnShutdown
 # copy the meshes manually to the shard directory, so the webots on macos can find them (outside of vm)
 def copy_meshes_to_shared(context, *args, **kwargs):
     package_dir = get_package_share_directory('webots_ros2_turtlebot4')
@@ -46,6 +46,8 @@ def generate_launch_description():
     package_dir = get_package_share_directory('webots_ros2_turtlebot4')
     OpaqueFunction(function=copy_meshes_to_shared),
 
+    namespace = 'Turtlebot4'
+
     world = LaunchConfiguration('world')
     use_sim_time = LaunchConfiguration('use_sim_time', default=True)
     
@@ -62,6 +64,7 @@ def generate_launch_description():
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
+        namespace=namespace,
         parameters=[{
             'robot_description': '<robot name=""><link name=""/></robot>'
         }],
@@ -73,6 +76,7 @@ def generate_launch_description():
         executable='static_transform_publisher',
         name='wheel_drop_left_to_base_link',
         output='screen',
+        namespace='Turtlebot4',
         arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'wheel_drop_left'],
     )
 
@@ -81,6 +85,7 @@ def generate_launch_description():
         executable='static_transform_publisher',
         name='wheel_drop_right_to_base_link',
         output='screen',
+        namespace='Turtlebot4',
         arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'wheel_drop_right'],
     )
 
@@ -92,26 +97,76 @@ def generate_launch_description():
         package='controller_manager',
         executable='spawner',
         output='screen',
+        namespace='Turtlebot4',
         arguments=['joint_state_broadcaster'] + controller_manager_timeout,
     )
     diffdrive_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
         output='screen',
+        namespace='Turtlebot4',
         arguments=['diffdrive_controller'] + controller_manager_timeout,
     )
+
+        # Add the bridge nodes
+    cliff_intensity_bridge = Node(
+        package='webots_ros2_turtlebot4',
+        executable='cliff_intensity_bridge',  # Assumes installed as executable (remove .py if needed)
+        name='cliff_intensity_bridge',
+        namespace='Turtlebot4',
+    )
+
+    ir_intensity_bridge = Node(
+        package='webots_ros2_turtlebot4',
+        executable='ir_intensity_bridge',  # Assumes installed as executable (remove .py if needed)
+        name='ir_intensity_bridge',
+        namespace='Turtlebot4',
+    )
+
+
+
+
     ros_control_spawners = [joint_state_broadcaster_spawner, diffdrive_controller_spawner]
     mappings = [
-        ('/diffdrive_controller/cmd_vel_unstamped', '/cmd_vel'), 
-        ('/diffdrive_controller/odom', '/odom'),
-        ('/Turtlebot4/rplidar', '/scan'),
-        ('/Turtlebot4/oakd_stereo_camera/point_cloud', '/depth_camera')
-        ]    
+    # Controller topics
+    (f'/{namespace}/diffdrive_controller/cmd_vel_unstamped', f'/{namespace}/cmd_vel'), 
+    (f'/{namespace}/diffdrive_controller/odom', f'/{namespace}/odom'),
+    # Sensor topics: Remap double-namespaced to single-namespaced
+    (f'/{namespace}/{namespace}/rplidar', f'/{namespace}/scan'),
+    (f'/{namespace}/{namespace}/rplidar/point_cloud', f'/{namespace}/rplidar/point_cloud'),
+    (f'/{namespace}/{namespace}/oakd_stereo_camera/point_cloud', f'/{namespace}/depth_camera'),
+    (f'/{namespace}/{namespace}/cliff_front_left', f'/{namespace}/cliff_front_left'),
+    (f'/{namespace}/{namespace}/cliff_front_right', f'/{namespace}/cliff_front_right'),
+    (f'/{namespace}/{namespace}/cliff_side_left', f'/{namespace}/cliff_side_left'),
+    (f'/{namespace}/{namespace}/cliff_side_right', f'/{namespace}/cliff_side_right'),
+    (f'/{namespace}/{namespace}/ir_intensity', f'/{namespace}/ir_intensity'),
+    (f'/{namespace}/{namespace}/ir_intensity_front_center_left/point_cloud', f'/{namespace}/ir_intensity_front_center_left/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_front_center_right/point_cloud', f'/{namespace}/ir_intensity_front_center_right/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_front_left/point_cloud', f'/{namespace}/ir_intensity_front_left/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_front_right/point_cloud', f'/{namespace}/ir_intensity_front_right/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_left/point_cloud', f'/{namespace}/ir_intensity_left/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_right/point_cloud', f'/{namespace}/ir_intensity_right/point_cloud'),
+    (f'/{namespace}/{namespace}/ir_intensity_side_left/point_cloud', f'/{namespace}/ir_intensity_side_left/point_cloud'),
+    (f'/{namespace}/{namespace}/cliff_front_left/point_cloud', f'/{namespace}/cliff_front_left/point_cloud'),
+    (f'/{namespace}/{namespace}/cliff_front_right/point_cloud', f'/{namespace}/cliff_front_right/point_cloud'),
+    (f'/{namespace}/{namespace}/cliff_side_left/point_cloud', f'/{namespace}/cliff_side_left/point_cloud'),
+    (f'/{namespace}/{namespace}/cliff_side_right/point_cloud', f'/{namespace}/cliff_side_right/point_cloud'),
+    (f'/{namespace}/{namespace}/oakd_rgb_camera/camera_info', f'/{namespace}/oakd_rgb_camera/camera_info'),
+    (f'/{namespace}/{namespace}/oakd_rgb_camera/image_color', f'/{namespace}/oakd_rgb_camera/image_color'),
+    (f'/{namespace}/{namespace}/oakd_stereo_camera/camera_info', f'/{namespace}/oakd_stereo_camera/camera_info'),
+    (f'/{namespace}/{namespace}/oakd_stereo_camera/image', f'/{namespace}/oakd_stereo_camera/image'),
+    (f'/{namespace}/{namespace}/p3d_gps', f'/{namespace}/p3d_gps'),
+    (f'/{namespace}/{namespace}/p3d_gps/speed', f'/{namespace}/p3d_gps/speed'),
+    (f'/{namespace}/{namespace}/p3d_gps/speed_vector', f'/{namespace}/p3d_gps/speed_vector'),
+    (f'/{namespace}/{namespace}/light_front_left', f'/{namespace}/light_front_left'),
+    (f'/{namespace}/{namespace}/light_front_right', f'/{namespace}/light_front_right'),
+    ]
 
     # Create a ROS node interacting with the simulated robot
     robot_description_path = os.path.join(package_dir, 'resource', 'turtlebot4.urdf')
     robot_driver = WebotsController(
         robot_name='Turtlebot4',
+        namespace=namespace,
         parameters=[
             {'robot_description': robot_description_path,
              'use_sim_time': use_sim_time,
@@ -131,7 +186,8 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'world',
-            default_value='turtlebot4_world.wbt',
+            #default_value='turtlebot4_world.wbt',
+            default_value='octagon_turt_world.wbt',
             description='Choose one of the world files from `/webots_ros2_turtlebot/world` directory'
         ),        
         OpaqueFunction(function=copy_meshes_to_shared),   
@@ -140,11 +196,13 @@ def generate_launch_description():
         robot_state_publisher,
         tf_wheel_drop_left,
         tf_wheel_drop_right,
+        cliff_intensity_bridge,
+        ir_intensity_bridge,    
         robot_driver,
         waiting_nodes,
-        # The following action will kill all nodes once the Webots simulation has exited
-        launch.actions.RegisterEventHandler(
-            event_handler=launch.event_handlers.OnProcessExit(
+        # Existing Webots exit handler
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
                 target_action=webots,
                 on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
             )
