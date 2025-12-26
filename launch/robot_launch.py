@@ -49,10 +49,12 @@ def generate_launch_description():
     world = LaunchConfiguration('world')
     use_sim_time = LaunchConfiguration('use_sim_time', default=True)
     
-    # Start a Webots simulation instance
+    # WebotsLauncher connects to remote Webots server on macOS (via local_simulation_server.py)
+    # It uses mode='realtime' to not start a local Webots instance
     webots = WebotsLauncher(
         world=PathJoinSubstitution([package_dir, 'worlds', world]),
-        ros2_supervisor=True
+        ros2_supervisor=True,
+        mode='realtime'  # Use realtime mode for remote connection
     )
 
     # Create the robot state publisher
