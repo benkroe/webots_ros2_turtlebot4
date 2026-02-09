@@ -1,10 +1,8 @@
 #VRML_SIM R2023b utf8
 
-EXTERNPROTO "../protos/OctagonalArena.proto"
+EXTERNPROTO "../protos/SquareArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
-#EXTERNPROTO "../protos/Turtlebot4.proto"
 EXTERNPROTO "../protos/Turtlebot4_lightSensors.proto"
-
 
 WorldInfo {
 }
@@ -16,8 +14,7 @@ Viewpoint {
   far 100
 }
 
-
-OctagonalArena {
+SquareArena {
   wallColor 0.3 0.3 0.3
 }
 
@@ -87,5 +84,3 @@ Turtlebot4_lightSensors {
   "--remap", "__ns:=/Turtlebot4_3"
 ]
 }
-
-

@@ -187,7 +187,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'world',
             #default_value='turtlebot4_world.wbt',
-            default_value='octagon_turt_world.wbt',
+            default_value='square_turt_world.wbt',
             description='Choose one of the world files from `/webots_ros2_turtlebot/world` directory'
         ),        
         OpaqueFunction(function=copy_meshes_to_shared),   

@@ -1,4 +1,3 @@
-
 import os
 import launch
 import shutil
@@ -201,7 +200,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'world',
-            default_value='octagon_turt_world_multi.wbt',
+            default_value='square_turt_world_multi.wbt',
             description='Choose one of the world files from `/webots_ros2_turtlebot/world` directory'
         ),        
         OpaqueFunction(function=copy_meshes_to_shared),   
